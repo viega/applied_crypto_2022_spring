@@ -1,4 +1,13 @@
 # Problem Set 1
+## Due Date
+
+This assignment is due on Feb 16th, at 5pm Eastern time.  Late
+assignments will be accepted.
+
+A sample input you can use as an example is provided in this
+directory, along with a valid matching output, which you can use for
+testing purposes.
+
 ## Getting oriented
 
 All of the coding problem sets in the course should work like this:
@@ -11,7 +20,7 @@ All of the coding problem sets in the course should work like this:
   submission deadline.
 
 - The standard input (stdin) will be a JSON object, where the keys are
-  strings, "problem1", "problem2", ... "problem<n>".  The values will
+  strings, "problem 1", "problem 2", ... "problem *n*".  The values will
   vary, depending on the problem.
 
 - You will write a single JSON object to standard output (stdout),
@@ -94,10 +103,12 @@ which you must transform by converting all the lowercase letters to
 upper case.  If you're using Python, this is easy to do, by calling
 the 'upper' method on a string.  For instance:
 
-`>>> s = "af0b21f"
+```
+>>> s = "af0b21f"
 >>> print(s.upper())
 AF0B21F
->>>`
+>>>
+```
 
 The input JSON for this would look like:
 
@@ -151,7 +162,8 @@ instead.
 
 Now, add 0x20 (32) to each byte: `[0x68, 0x65, 0x6c, 0x6c, 0x6f]`
 
-If you treat this as a UTF-8 encoded string, it would now read "HELLO".
+If you treat this as a UTF-8 encoded string, it would now read "HELLO"
+(it started off as "hello").
 
 Now, add 0x00 to the first byte, 0x01 to the second, 0x02 to the 3rd,
 0x04 to the fourth, and 0x05 to the fifth.  You'd now have: `[0x68,
@@ -162,6 +174,9 @@ Do all these additions modulo 256.
 Now, convert this back to a hex string and output it as JSON:
 
 `{"problem 3": ["68666E6F73"]}`
+
+Remember, for each byte of input you get, you must be able to handle
+any of the 256 possible values.
 
 
 ### Problem 4
