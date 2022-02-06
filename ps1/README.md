@@ -171,7 +171,7 @@ Now, add 0x00 to the first byte, 0x01 to the second, 0x02 to the 3rd,
 
 Do all these additions modulo 256.
 
-Now, convert this back to a hex string and output it as JSON:
+Now, convert this back to an upper hex string and output it as JSON:
 
 `{"problem 3": ["68666E6F73"]}`
 
