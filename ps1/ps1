@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+import json
+import secrets
+import sys
+import typing
+
+
+def problem1(data: typing.List[str]) -> typing.List[str]:
+    return [i.upper() for i in data]
+
+
+def problem2(data: typing.List[str]) -> typing.List[str]:
+    return [bytes.fromhex(i).decode() for i in data]
+
+
+def problem3(data: typing.List[str]) -> typing.List[str]:
+    return [
+        bytes((j + 0x20 + i) % 256 for i, j in enumerate(bytes.fromhex(d)))
+        .hex()
+        .upper()
+        for d in data
+    ]
+
+
+def problem4(data: typing.List[int]) -> typing.List[int]:
+    return [secrets.randbelow(i) for i in data]
+
+
+if __name__ == "__main__":
+    data = json.loads(sys.stdin.read())
+    solution_mapping = {k: globals()[k.replace(" ", "")] for k in data}
+    print(json.dumps({k: s(data[k]) for k, s in solution_mapping.items()}, indent=4))
