@@ -1,0 +1,21 @@
+#! /usr/bin/env python3
+"""
+Solution by Professor John Viega
+"""
+import json, sys, secrets
+
+ins = json.load(sys.stdin)
+
+
+def prob_3(s):
+    return bytes([(s[i] + (0x20 + i)) & 0xFF for i in range(len(s))]).hex()
+
+
+outs = {
+    "problem 1": [x.upper() for x in ins["problem 1"]],
+    "problem 2": [bytes.fromhex(x).decode("utf-8") for x in ins["problem 2"]],
+    "problem 3": [prob_3(bytes.fromhex(x)) for x in ins["problem 3"]],
+    "problem 4": [secrets.randbits(64) % x for x in ins["problem 4"]],
+}
+
+json.dump(outs, sys.stdout, indent="  ")
