@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Solution by TA - Miroslav Shubernetskiy
+"""
 import json
 import secrets
 import sys
