@@ -36,6 +36,9 @@
   - [Read file](#read-file)
   - [Write file](#write-file)
 - [Library Recommendations](#library-recommendations)
+- [Debugging](#debugging)
+  - [REPL](#repl)
+  - [Debugger](#debugger)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -396,3 +399,22 @@ Useful stdlib:
 - https://docs.python.org/3.10/library/itertools.html#module-itertools
 - https://docs.python.org/3.10/library/collections.html#module-collections
 - https://docs.python.org/3.10/library/dataclasses.html#module-dataclasses
+
+## Debugging
+
+### REPL
+
+Much better REPL shell compared to standard REPL:
+
+- https://github.com/prompt-toolkit/ptpython
+
+![ptpython](https://github.com/jonathanslenders/ptpython/raw/master/docs/images/example1.png)
+
+### Debugger
+
+Much better `pdb` debugger. Highly recommend. If you try it, definitely check
+the `sticky` mode.
+
+- https://github.com/pdbpp/pdbpp
+
+![pdbpp](https://user-images.githubusercontent.com/412005/64484794-2f373380-d20f-11e9-9f04-e1dabf113c6f.png)
