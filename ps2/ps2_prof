@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""
+Solution by Professor John Viega
+"""
+import json
+import sys
+
+
+def answer1(params):
+    old_pt = bytes.fromhex(params["old_pt"])
+    old_ct = bytes.fromhex(params["old_ct"])
+    old_trades = []
+    n = len(old_pt) // 16
+    for _ in range(n):
+        old_trades.append((old_pt[0:1], old_pt[2:6], int(old_pt[8:16]), old_ct[:16]))
+        old_pt = old_pt[16:]
+        old_ct = old_ct[16:]
+
+    op1 = bytes(params["op_1"], encoding="utf8")
+    op2 = bytes(params["op_2"], encoding="utf8")
+    co1 = bytes(params["co_1"], encoding="utf8")
+    co2 = bytes(params["co_2"], encoding="utf8")
+
+    can_sub = []
+    replacement_ct = None
+    highest_shares = 0
+    for item in old_trades:
+        if item[0] == op1 and item[1] == co1:
+            can_sub.append(item[3])
+        if item[0] != op2 or item[1] != co2:
+            continue
+        if item[2] > highest_shares:
+            highest_shares = item[2]
+            replacement_ct = item[3]
+
+    new_trade_list = params["new_trades"]
+
+    outputs = []
+    for trade in new_trade_list:
+        new_ct = bytes.fromhex(trade)
+        munged_ct = b""
+        n = len(new_ct) // 16
+        for _ in range(n):
+            if new_ct[:16] in can_sub:
+                munged_ct += replacement_ct
+            else:
+                munged_ct += new_ct[:16]
+            new_ct = new_ct[16:]
+        outputs.append(munged_ct.hex())
+
+    return outputs
+
+
+def answer2(params):
+    old_pt = bytes.fromhex(params["old_pt"])
+    old_ct = bytes.fromhex(params["old_ct"])
+    new_ct = bytes.fromhex(params["new_ct"])
+
+    resbytes = []
+    for i in range(len(new_ct)):
+        resbytes.append(old_pt[i] ^ old_ct[i] ^ new_ct[i])
+
+    return bytes(resbytes).hex()
+
+
+def answer3(params):
+    ct = bytes.fromhex(params["todays_ct"])
+    new_bytes = []
+    for i in range(0, len(ct)):
+        if not i % 16:
+            new_bytes.append(ct[i] ^ 17)
+        else:
+            new_bytes.append(ct[i])
+    return bytes(new_bytes).hex()
+
+
+def format_num(n):
+    b = bytes(str(n), encoding="utf8")
+    n = 8 - len(b)
+    b += b" " * n
+    return b
+
+
+def a4_helper(trade, expected_num, actual_num):
+    res = []
+    res.append(trade[0] ^ 17)
+    res.append(trade[1])
+    res.append(trade[2])
+    res.append(trade[3])
+    res.append(trade[4])
+    res.append(trade[5])
+    res.append(trade[6])
+    res.append(trade[7])
+
+    expected_bytes = format_num(expected_num)
+    desired_bytes = format_num(actual_num)
+
+    for i in range(8):
+        res.append(expected_bytes[i] ^ desired_bytes[i] ^ trade[8 + i])
+
+    return bytes(res).hex()
+
+
+def answer4(params):
+    tl = [bytes.fromhex(x) for x in params["trade_list"]]
+    en = params["expected_num"]
+    an = params["actual_num"]
+
+    ret = []
+    for i in range(len(tl)):
+        ret.append(a4_helper(tl[i], en[i], an[i]))
+
+    return ret
+
+
+inputs_json = json.load(sys.stdin)
+
+
+output = {}
+
+output["problem 1"] = answer1(inputs_json["problem 1"])
+output["problem 2"] = answer2(inputs_json["problem 2"])
+output["problem 3"] = answer3(inputs_json["problem 3"])
+output["problem 4"] = answer4(inputs_json["problem 4"])
+
+print(json.dumps(output))
