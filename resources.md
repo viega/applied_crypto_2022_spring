@@ -29,10 +29,13 @@
   - [Generate random number](#generate-random-number)
   - [Generate random `bytes`](#generate-random-bytes)
 - [Chunking Data](#chunking-data)
+- [Python Features](#python-features)
+  - [Inline Functions (lambda)](#inline-functions-lambda)
 - [CLI](#cli)
   - [Arguments Parsing](#arguments-parsing)
   - [Fail](#fail)
 - [File Management](#file-management)
+  - [Generate Path In Same Folder](#generate-path-in-same-folder)
   - [Read file](#read-file)
   - [Write file](#write-file)
 - [Library Recommendations](#library-recommendations)
@@ -336,6 +339,27 @@ b'\xca\x1ca7\xe6\xf5\xf4Kt\xe8'
 [['h', 'e', 'l', 'l', 'o'], ['w', 'o', 'r', 'l', 'd']]
 ```
 
+## Python Features
+
+### Inline Functions (lambda)
+
+```python
+>>> double = lambda i: i * 2
+>>> double(2)
+4
+>>> def triple(i):
+  2     return i * 3
+>>> triple(2)
+6
+```
+
+`lambda` is especially useful as inline parameter options:
+
+```python
+>>> list(filter(lambda i: i > 5, [1, 3, 5, 7, 9]))
+[7, 9]
+```
+
 ## CLI
 
 ### Arguments Parsing
@@ -356,6 +380,19 @@ sys.exit(1)
 ## File Management
 
 - https://docs.python.org/3.10/library/pathlib.html#pathlib.Path
+- https://docs.python.org/3.10/library/pathlib.html#pathlib.Path.exists
+- https://docs.python.org/3.10/library/pathlib.html#pathlib.PurePath.name
+
+### Generate Path In Same Folder
+
+- https://docs.python.org/3.10/library/pathlib.html#pathlib.PurePath.with_name
+
+```python
+>>> pathlib.Path('foo').with_name('bar')
+PosixPath('bar')
+>>> pathlib.Path('foo').parent / 'bar'
+PosixPath('bar')
+```
 
 ### Read file
 
