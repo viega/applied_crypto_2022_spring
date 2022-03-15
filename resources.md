@@ -410,6 +410,66 @@ pathlib.Path('filepath').read_bytes()
 pathlib.Path('filepath').write_bytes(b'hello')
 ```
 
+## Crypto
+
+### CTR Mode
+
+You can always implement CTR manually. It is a pretty simple cipher mode:
+
+![CTR mode](https://upload.wikimedia.org/wikipedia/commons/3/3f/Ctr_encryption.png)
+
+Or you can have the library do it for you. Only nuanced point about CTR mode
+is that different implementations increment the nonce/counter/iv differently.
+Some implementations use fixed size of nonce and counter within the IV (like
+in screenshot above). For example 12 bytes for nonce and 4 bytes for counter
+or both being 8 bytes. Yet other implementations treat the whole IV as a
+single nonce/counter and increment it as a 16 byte integer. OpenSSL happens to
+implement the approach of the whole nonce being a counter. Call chain:
+
+- [`aes_ctr_cipher`](https://github.com/openssl/openssl/blob/70f39a487d3f7d976a01e0ee7ae98a82ceeea7a0/crypto/evp/e_aes.c#L2620-L2643)
+- [`CRYPTO_ctr128_encrypt`](https://github.com/openssl/openssl/blob/1c0eede9827b0962f1d752fa4ab5d436fa039da4/crypto/modes/ctr128.c#L73-L148)
+- [`ctr128_inc_aligned`](https://github.com/openssl/openssl/blob/1c0eede9827b0962f1d752fa4ab5d436fa039da4/crypto/modes/ctr128.c#L39-L60)
+- [`ctr128_inc`](https://github.com/openssl/openssl/blob/1c0eede9827b0962f1d752fa4ab5d436fa039da4/crypto/modes/ctr128.c#L26-L37)
+
+`ctr128_inc` is defined as:
+
+```c
+/* increment counter (128-bit int) by 1 */
+static void ctr128_inc(unsigned char *counter)
+{
+    u32 n = 16, c = 1;
+
+    do {
+        --n;
+        c += counter[n];
+        counter[n] = (u8)c;
+        c >>= 8;
+    } while (n);
+}
+```
+
+Looks complicated but it essentially increments 128-bit number and handles
+overflow correctly. so `0xffffffffffffffffffffffffffffffff` overflows to
+`0x00000000000000000000000000000000`.
+
+Since [cryptography](https://www.pycryptodome.org/en/latest/) is a wrapper
+around OpenSSL, if we use it for CTR mode, it automatically increments all of
+16 bytes of the nonce for us. Lets prove that:
+
+```python
+>>> from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+
+>>> key = bytes(range(16))
+
+>>> block_one = Cipher(algorithm=algorithms.AES(key), mode=modes.CBC(b"\xff" * 16)).encryptor().update(b"\x00" * 16)
+>>> block_two = Cipher(algorithm=algorithms.AES(key), mode=modes.CBC(b"\x00" * 16)).encryptor().update(b"\x00" * 16)
+>>> (block_one + block_two).hex()
+'3c441f32ce07822364d7a2990e50bb13c6a13b37878f5b826f4f8162a1c8d879'
+
+>>> Cipher(algorithm=algorithms.AES(key), mode=modes.CTR(b"\xff" * 16)).encryptor().update(b"\x00" * 32).hex()
+'3c441f32ce07822364d7a2990e50bb13c6a13b37878f5b826f4f8162a1c8d879'
+```
+
 ## Library Recommendations
 
 Crypto:
