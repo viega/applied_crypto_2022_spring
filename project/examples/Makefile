@@ -1,3 +1,5 @@
+SHELL=bash
+
 FENCRYPT?=./fencrypt
 
 PREFIX=.fenc-meta.
@@ -10,6 +12,7 @@ all: encrypt search
 encrypt: $(addprefix $(PREFIX),$(TEXT_FILES) $(BINARY_FILES))
 
 $(PREFIX)%: %
+	@echo "encryptiing with password: $(shell echo -n $* | python -c 'import sys; print(repr(sys.stdin.read()))')"
 	echo -n $* | $(FENCRYPT) -e -j $*
 
 search:
@@ -27,17 +30,20 @@ search:
 	echo -n aeschylus.txt | $(FENCRYPT) -s άδρασ*
 
 clean:
-	-rm *.txt* .*.txt
-	-rm *.jpg* .*.jpg
+	@-rm *.txt* .*.txt
+	@-rm *.jpg* .*.jpg
 
 macbeth.txt:
+	@echo
 	# https://www.gutenberg.org/ebooks/2264
 	curl -s https://www.gutenberg.org/cache/epub/2264/pg2264.txt | tee $@.plain > $@
 
 aeschylus.txt:
+	@echo
 	# https://www.gutenberg.org/ebooks/17996
 	curl -s https://www.gutenberg.org/files/17996/17996-0.txt | tee $@.plain > $@
 
 ecb.jpg:
+	@echo
 	# https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation
 	curl -s https://upload.wikimedia.org/wikipedia/commons/f/f0/Tux_ecb.jpg | tee $@.plain > $@

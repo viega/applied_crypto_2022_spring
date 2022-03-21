@@ -1,6 +1,6 @@
 {
-    "salt": "beba2f4be9a66576243e2e12e1783936",
-    "validator": "fa1b79fb7a98d1b44d2ad2ca29cf0f4b",
-    "mac": "0351b7a24820105c7a150a9e804fa1b811292096d93d8edd6945b3945ea61b7d",
+    "salt": "0fd5548c7477a2bd661e46cd2d0be400",
+    "validator": "856c07297389c17689f5dae633881edb",
+    "mac": "8de6be05e204beaace6597c54f2eb6b04a819fc1feda79519d06072b490b20cc",
     "terms": []
 }
