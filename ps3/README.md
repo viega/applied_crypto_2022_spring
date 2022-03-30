@@ -87,4 +87,4 @@ You output the plaintext.
 --
 
 
-[^1:] 'Reduced by' means use the modulus operator.
+[^1]: 'Reduced by' means use the modulus operator.
