@@ -24,7 +24,9 @@
   - [Combine multiple iterables](#combine-multiple-iterables)
   - [List Comprehensions](#list-comprehensions)
   - [Sorting](#sorting)
+  - [Iterators/Generators](#iteratorsgenerators)
 - [XOR bytes](#xor-bytes)
+  - [XOR Iterators](#xor-iterators)
 - [Random](#random)
   - [Generate random number](#generate-random-number)
   - [Generate random `bytes`](#generate-random-bytes)
@@ -38,6 +40,9 @@
   - [Generate Path In Same Folder](#generate-path-in-same-folder)
   - [Read file](#read-file)
   - [Write file](#write-file)
+- [Crypto](#crypto)
+  - [CTR Mode](#ctr-mode)
+- [Doctests](#doctests)
 - [Library Recommendations](#library-recommendations)
 - [Debugging](#debugging)
   - [REPL](#repl)
@@ -282,6 +287,85 @@ You can sort via a function:
 ['e2', 'f3', 'ee', '9f', 'ef', 'bf']
 ```
 
+### Iterators/Generators
+
+Python support a notion of an iterator and generator objects:
+
+- https://docs.python.org/3.10/library/stdtypes.html#iterator-types
+- https://docs.python.org/3.10/library/stdtypes.html#generator-types
+
+Many built-in types are already iterators such as `str`, `bytes`, `list`.
+Essentially iterators/generators allow to use an object in loop constructs in
+Python by defining how an object is iterated.
+In some cases iterators/generators allow to optimize things like memory usage.
+Lets reimplement `range` for example:
+
+```python
+>>> def naive_range(limit: int) -> typing.List[int]:
+  2     output = []
+  3     i = 0
+  4     while i < limit:
+  5         output.append(i)
+  6         i += 1
+  7     return output
+>>> for i in naive_range(5):
+  2     print(i)
+0
+1
+2
+3
+4
+```
+
+`naive_range` works however it's inefficient as it has to store all items
+in-memory before returning a list. Lets recreate `range` as an iterator:
+
+```python
+>>> class RangeIterator:
+  2     def __init__(self, limit: int):
+  3         self.limit = limit
+  4         self.i = 0
+  5     def __iter__(self):
+  6         return self
+  7     def __next__(self):
+  8         if self.i < self.limit:
+  9             self.i += 1
+ 10             return self.i - 1
+ 11         else:
+ 12             raise StopIteration()
+>>> for i in RangeIterator(5):
+  2     print(i)
+0
+1
+2
+3
+4
+```
+
+The output is the same however iterator is much more efficient as it returns a
+value on each increment without needing to store full range list.
+
+Generators take things a step further by allowing to easily create iterators
+with a `yield` statement instead of all the magic methods (`__iter__` and `__next__`):
+
+```python
+>>> def range_generator(limit: int):
+  2     i = 0
+  3     while i < limit:
+  4         yield i
+  5         i += 1
+>>> for i in range_generator(5):
+  2     print(i)
+0
+1
+2
+3
+4
+```
+
+This might be useful for things like generating unbound size streams of data
+(e.g. keystreams :wink:)
+
 ## XOR bytes
 
 - https://docs.python.org/3.10/library/stdtypes.html#numeric-types-int-float-complex
@@ -299,6 +383,45 @@ def xor(*args: bytes) -> bytes:
     b'world'
     """
     return bytes(functools.reduce(lambda a, b: a ^ b, i) for i in zip(*args))
+```
+
+### XOR Iterators
+
+Here is a similar version but which also supports `xor`ing iterators/generators:
+
+- https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.flatten
+- https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.collapse
+
+```python
+import functools
+import more_itertools
+def xor(*args: typing.Union[bytes, typing.Iterable[bytes]]) -> bytes:
+    """
+    >>> xor(b'hello', b'world').hex()
+    '1f0a1e000b'
+    >>> xor(b'hello', b'world', b'hello') # note it has >2 parameters
+    b'world'
+    >>> xor(xor(b'hello', b'world'), b'hello') # equivalent to above but longer :D
+    b'world'
+
+    >>> xor(b'hello', [b'world']).hex()
+    '1f0a1e000b'
+
+    >>> def g(i: bytes):
+    ...     while True:
+    ...         yield i
+
+    >>> xor(b'hello', g(b'world')).hex()
+    '1f0a1e000b'
+    >>> xor(b'hellothere', b'worldthere', g(b'hello'))
+    b'worldhello'
+    """
+    return bytes(
+        functools.reduce(lambda a, b: a ^ b, i)
+        for i in zip(
+            *[more_itertools.flatten(more_itertools.collapse(i)) for i in args]
+        )
+    )
 ```
 
 ## Random
@@ -470,6 +593,34 @@ around OpenSSL, if we use it for CTR mode, it automatically increments all of
 '3c441f32ce07822364d7a2990e50bb13c6a13b37878f5b826f4f8162a1c8d879'
 ```
 
+## Doctests
+
+- https://docs.python.org/3.10/library/doctest.html#module-doctest
+- https://docs.python.org/3.10/tutorial/controlflow.html#documentation-strings
+- https://docs.pytest.org/en/stable/how-to/doctest.html
+
+A really useful testing feature in Python are doctests which allow to include
+tests in module/function doc strings. Some of the above examples actually already use doctests.
+For example `xor` function included tests. If the function is pasted to `xor.py` it could be tested with `pytest`:
+
+```bash
+➜ pytest --doctest-modules xor.py
+=================== test session starts ====================
+platform darwin -- Python 3.6.15, pytest-7.0.1, pluggy-1.0.0
+rootdir: applied_crypto_2022_spring
+plugins: subtests-0.7.0
+collected 1 item
+
+xor.py .                                             [100%]
+
+==================== 1 passed in 0.06s =====================
+```
+
+Adding tests directly in doc-string allows to use the code documentation as
+both the documentation of example usage as well as runnable tests.
+This is especially useful for utility functions which can themselves check
+their correctness.
+
 ## Library Recommendations
 
 Crypto:
@@ -496,6 +647,10 @@ Useful stdlib:
 - https://docs.python.org/3.10/library/itertools.html#module-itertools
 - https://docs.python.org/3.10/library/collections.html#module-collections
 - https://docs.python.org/3.10/library/dataclasses.html#module-dataclasses
+
+Testing:
+
+- https://docs.pytest.org/en/stable/contents.html
 
 ## Debugging
 
