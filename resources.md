@@ -42,6 +42,7 @@
   - [Write file](#write-file)
 - [Crypto](#crypto)
   - [CTR Mode](#ctr-mode)
+- [Doctests](#doctests)
 - [Library Recommendations](#library-recommendations)
 - [Debugging](#debugging)
   - [REPL](#repl)
@@ -592,6 +593,34 @@ around OpenSSL, if we use it for CTR mode, it automatically increments all of
 '3c441f32ce07822364d7a2990e50bb13c6a13b37878f5b826f4f8162a1c8d879'
 ```
 
+## Doctests
+
+- https://docs.python.org/3.10/library/doctest.html#module-doctest
+- https://docs.python.org/3.10/tutorial/controlflow.html#documentation-strings
+- https://docs.pytest.org/en/stable/how-to/doctest.html
+
+A really useful testing feature in Python are doctests which allow to include
+tests in module/function doc strings. Some of the above examples actually already use doctests.
+For example `xor` function included tests. If the function is pasted to `xor.py` it could be tested with `pytest`:
+
+```bash
+➜ pytest --doctest-modules xor.py
+=================== test session starts ====================
+platform darwin -- Python 3.6.15, pytest-7.0.1, pluggy-1.0.0
+rootdir: applied_crypto_2022_spring
+plugins: subtests-0.7.0
+collected 1 item
+
+xor.py .                                             [100%]
+
+==================== 1 passed in 0.06s =====================
+```
+
+Adding tests directly in doc-string allows to use the code documentation as
+both the documentation of example usage as well as runnable tests.
+This is especially useful for utility functions which can themselves check
+their correctness.
+
 ## Library Recommendations
 
 Crypto:
@@ -618,6 +647,10 @@ Useful stdlib:
 - https://docs.python.org/3.10/library/itertools.html#module-itertools
 - https://docs.python.org/3.10/library/collections.html#module-collections
 - https://docs.python.org/3.10/library/dataclasses.html#module-dataclasses
+
+Testing:
+
+- https://docs.pytest.org/en/stable/contents.html
 
 ## Debugging
 
